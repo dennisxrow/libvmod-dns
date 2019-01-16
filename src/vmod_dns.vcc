@@ -1,3 +1,70 @@
-$Module dns 3
-$Function STRING resolve(STRING)
-$Function STRING rresolve(STRING)
+#-
+# Copyright (c) 2013-2015 Kenneth Shaw
+# Copyright 2018 UPLEX - Nils Goroll Systemoptimierung
+#
+# Authors: Kenneth Shaw
+#          Nils Goroll
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+$Module dns 3 Varnish dns Module
+
+DESCRIPTION
+===========
+
+This vmod provides functions to query the system's name resolution
+service (which, in most cases, will be using the Domain Name System
+(DNS), hence the name).
+
+In particular, utility functions for name service based validations
+are being provided, for example to identify legit search engine
+crawlers based on the domain name.
+
+  **WARNING**
+
+  *name resolution queries can be slow as in dead slow, slow as can
+  be, totally unacceptably slow for a high performance delivery
+  software like Varnish. Typical DNS timeouts in the order of seconds
+  are at least tens of thousands of times longer than typical
+  processing times in varnish. Thus* **extreme care** *should be taken
+  when using this vmod*, for example by narrowing calls to dns vmod
+  functions to rare cases or heavily rate-limiting them (as with
+  ``vmod_vsstrottle``, see
+  https://github.com/varnish/varnish-modules). Also, using a name
+  service cache (like ``nscd``) with tight timeouts is recommended.
+
+  You've been warned.
+
+$Function STRING resolve(STRING s)
+
+Converts the string *s* to the first IP number returned by the system
+library function getaddrinfo(3) and returns the result as a string.
+
+This function has been obsoleted by ``std.ip()`` from varnish-cache
+and is only provided for backwards compatibility. Other than that, it
+is slightly more efficient if both a string result is required.
+
+$Function STRING rresolve(STRING s)
+
+Converts the string *s* to the first IP number returned by the system
+library function getaddrinfo(3), issues a reverse lookup using the
+library function getnameinfo(3) and returns the result.
